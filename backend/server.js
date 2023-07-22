@@ -1,3 +1,4 @@
+import path from 'path'
 import express from "express"
 import dotenv from "dotenv"
 import userRoute from './routes/userRoute.js'
@@ -19,7 +20,17 @@ app.use(express.urlencoded({ extended: true })) //form data
 app.use(cookieParser());
 // Routes
 app.use('/api/users/', userRoute);
-app.get('/', (req, res) => res.send('Server is ready'));
+
+if (process.env.NODE_ENV === 'production') {
+    const __dirname = path.resolve();
+    app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+    app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html')));
+}
+else {
+    app.get('/', (req, res) => res.send('Server is ready'));
+}
+
 
 app.use(notFound, errorHandler);
 
